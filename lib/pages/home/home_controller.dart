@@ -7,7 +7,8 @@ import 'package:flutter/material.dart';
 class HomeController extends GetxController {
   final Dio _dio = Dio();
   MapController? mapController;
-  var currentLocation = const LatLng(10.762622, 106.660172).obs;
+  LatLng currentLocation = const LatLng(10.762622, 106.660172);
+  String currentLocationName = '';
   List<Marker> markers = [];
   var currentZoom = 10.0.obs;
 
@@ -17,13 +18,27 @@ class HomeController extends GetxController {
     mapController = MapController();
     markers.add(
       Marker(
-        point: currentLocation.value,
+        point: currentLocation,
         child: const Icon(
           Icons.location_pin,
           color: Colors.red,
         ),
       ),
     );
+    updateCurrentLocationName();
+  }
+
+  void updateCurrentLocationName() async {
+    final String url =
+        'https://nominatim.openstreetmap.org/reverse?lat=${currentLocation.latitude}&lon=${currentLocation.longitude}&format=json';
+    final response = await _dio.get(url);
+
+    if (response.statusCode == 200) {
+      currentLocationName = response.data['display_name'];
+      update();
+    } else {
+      throw Exception('Failed to load location name');
+    }
   }
 
   void zoomIn() {
@@ -58,7 +73,9 @@ class HomeController extends GetxController {
   }
 
   void moveToLocation(LatLng position) {
+    currentLocation = position;
     mapController?.move(position, currentZoom.value);
+    updateCurrentLocationName();
   }
 
   void clearMarkers() {
@@ -90,7 +107,6 @@ class HomeController extends GetxController {
       for (var result in results) {
         double lat = double.parse(result['lat']);
         double lon = double.parse(result['lon']);
-        currentLocation.value = LatLng(lat, lon);
         addMarker(LatLng(lat, lon), result['display_name']);
         moveToLocation(LatLng(lat, lon));
       }

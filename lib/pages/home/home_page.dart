@@ -38,7 +38,7 @@ class HomePage extends GetView<HomeController> {
               FlutterMap(
                 mapController: controller.mapController,
                 options: MapOptions(
-                  initialCenter: controller.currentLocation.value,
+                  initialCenter: controller.currentLocation,
                   initialZoom: 8.0,
                   onTap: (tapPosition, point) {
                     controller.addMarker(point, 'Tapped location');
@@ -57,10 +57,9 @@ class HomePage extends GetView<HomeController> {
                     right: 10,
                     child: FloatingActionButton(
                       onPressed: () {
-                        controller
-                            .moveToLocation(controller.currentLocation.value);
-                        controller.addMarker(
-                            controller.currentLocation.value, 'TP HCM');
+                        controller.moveToLocation(controller.currentLocation);
+                        controller.addMarker(controller.currentLocation,
+                            controller.currentLocationName);
                       },
                       child: const Icon(
                         Icons.navigation,
